@@ -18,4 +18,4 @@ build/
 
 # Windows
 desktop.ini
-*.lnk    # Windows shortcuts
+launch_rapidlogger.bat - Shortcut.lnk

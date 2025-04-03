@@ -4,6 +4,18 @@ import csv
 from datetime import datetime
 import os
 
+class Colors:
+    """Color constants for the application theme"""
+    BG = '#000000'
+    FG = '#ffffff'
+    ENTRY_BG = '#3b3b3b'
+    BUTTON_BG = '#404040'
+    BUTTON_HOVER = '#505050'
+    TITLE_BG = '#000000'
+    BUTTON_ACTIVE_BG = '#505050'
+    BUTTON_ACTIVE_FG = '#ffffff'
+    CLOSE_HOVER = '#bf0000'
+
 class OverlayApp:
     def __init__(self, root):
         self.root = root
@@ -12,21 +24,13 @@ class OverlayApp:
         # Make window appear in taskbar and Alt+Tab
         self.root.wm_attributes('-toolwindow', 0)
         
-        # Configure dark theme colors
-        self.bg_color = '#2b2b2b'
-        self.fg_color = '#ffffff'
-        self.entry_bg = '#3b3b3b'
-        self.button_bg = '#404040'
-        self.button_hover = '#4a4a4a'
-        self.title_bg = '#1e1e1e'  # Darker color for title bar
-        
         # Initialize file paths
         self.csv_file = "data_log.csv"
         self.html_file = "data_log.html"
         self.initialize_files()
         
         # Configure the root window
-        self.root.configure(bg=self.bg_color)
+        self.root.configure(bg=Colors.BG)
         
         # Remove default title bar and make window transparent and always on top
         self.root.overrideredirect(True)
@@ -35,112 +39,109 @@ class OverlayApp:
         
         # Create and configure style for dark theme
         self.style = ttk.Style()
-        self.style.configure('Dark.TFrame', background=self.bg_color)
+        self.style.configure('Dark.TFrame', background=Colors.BG)
         self.style.configure('Dark.TLabel', 
-                           background=self.bg_color, 
-                           foreground=self.fg_color)
+                           background=Colors.BG, 
+                           foreground=Colors.FG)
         
-        # Create title bar frame
-        self.title_bar = tk.Frame(self.root, bg=self.title_bg, height=30)
-        self.title_bar.pack(fill=tk.X)
-        self.title_bar.bind('<Button-1>', self.start_move)
-        self.title_bar.bind('<B1-Motion>', self.on_move)
-        
-        # Add title label without emoji
-        self.title_label = tk.Label(self.title_bar, text="RapidLogger", bg=self.title_bg, fg='white')
-        self.title_label.pack(side=tk.LEFT, padx=10)
-        self.title_label.bind('<Button-1>', self.start_move)
-        self.title_label.bind('<B1-Motion>', self.on_move)
-        
-        # Create close button
-        self.close_button = tk.Button(self.title_bar, text='✕', command=self.root.quit, 
-                                    bg=self.title_bg, fg='white', bd=0, padx=10,
-                                    activebackground='#bf0000', activeforeground='white')
-        self.close_button.pack(side=tk.RIGHT)
-        
-        # Create main frame
-        self.main_frame = ttk.Frame(root, padding="10", style='Dark.TFrame')
-        self.main_frame.pack(fill=tk.BOTH, expand=True)
-        
-        # Create input fields frame
-        self.input_frame = ttk.Frame(self.main_frame, style='Dark.TFrame')
-        self.input_frame.pack(fill=tk.X, pady=5)
-        
-        # Create input fields with left-aligned labels
-        self.input1_label = ttk.Label(self.input_frame, text="Comp:", style='Dark.TLabel', width=6, anchor='w')
-        self.input1_label.pack(side=tk.LEFT, padx=(0, 10))
-        self.input1 = tk.Entry(self.input_frame, width=30, 
-                             bg=self.entry_bg, fg=self.fg_color,
-                             insertbackground=self.fg_color)
-        self.input1.pack(side=tk.LEFT, fill=tk.X, expand=True)
-        
-        # Create second input frame
-        self.input2_frame = ttk.Frame(self.main_frame, style='Dark.TFrame')
-        self.input2_frame.pack(fill=tk.X, pady=5)
-        
-        self.input2_label = ttk.Label(self.input2_frame, text="Link:", style='Dark.TLabel', width=6, anchor='w')
-        self.input2_label.pack(side=tk.LEFT, padx=(0, 10))
-        self.input2 = tk.Entry(self.input2_frame, width=30,
-                             bg=self.entry_bg, fg=self.fg_color,
-                             insertbackground=self.fg_color)
-        self.input2.pack(side=tk.LEFT, fill=tk.X, expand=True)
-        
-        # Create button frame for horizontal layout
-        self.button_frame = ttk.Frame(self.main_frame, style='Dark.TFrame')
-        self.button_frame.pack(fill=tk.X, pady=10)
-        
-        # Create send button with hover binding
-        self.send_button = tk.Button(self.button_frame, text="Send", 
-                                   command=self.save_data,
-                                   bg=self.button_bg,
-                                   fg=self.fg_color,
-                                   activebackground='#505050',
-                                   activeforeground='#ffffff',
-                                   relief='flat',
-                                   width=10,
-                                   borderwidth=1)
-        self.send_button.pack(side=tk.LEFT, padx=5, expand=True)
-        self.send_button.bind('<Enter>', lambda e: e.widget.config(bg='#505050'))
-        self.send_button.bind('<Leave>', lambda e: e.widget.config(bg=self.button_bg))
-        
-        # Create refresh button with hover binding
-        self.refresh_button = tk.Button(self.button_frame, text="Refresh", 
-                                    command=self.refresh_view,
-                                    bg=self.button_bg,
-                                    fg=self.fg_color,
-                                    activebackground='#505050',
-                                    activeforeground='#ffffff',
-                                    relief='flat',
-                                    width=10,
-                                    borderwidth=1)
-        self.refresh_button.pack(side=tk.LEFT, padx=5, expand=True)
-        self.refresh_button.bind('<Enter>', lambda e: e.widget.config(bg='#505050'))
-        self.refresh_button.bind('<Leave>', lambda e: e.widget.config(bg=self.button_bg))
-        
-        # Create close button with hover binding
-        self.close_button = tk.Button(self.button_frame, text="Close", 
-                                    command=self.root.quit,
-                                    bg=self.button_bg,
-                                    fg=self.fg_color,
-                                    activebackground='#505050',
-                                    activeforeground='#ffffff',
-                                    relief='flat',
-                                    width=10,
-                                    borderwidth=1)
-        self.close_button.pack(side=tk.LEFT, padx=5, expand=True)
-        self.close_button.bind('<Enter>', lambda e: e.widget.config(bg='#505050'))
-        self.close_button.bind('<Leave>', lambda e: e.widget.config(bg=self.button_bg))
+        self._create_title_bar()
+        self._create_main_frame()
+        self._create_input_fields()
+        self._create_buttons()
         
         # Setup keyboard shortcuts
-        self.root.bind('<Return>', lambda e: self.handle_return(e))
+        self.root.bind('<Return>', self.handle_return)
         self.root.bind('<Escape>', lambda e: self.minimize_window())
         
         # Initial window position (bottom right)
         self.position_window()
         
-        # Register in taskbar
-        self.root.after(10, lambda: self.root.state('normal'))
+    def _create_title_bar(self):
+        """Create the custom title bar"""
+        self.title_bar = tk.Frame(self.root, bg=Colors.TITLE_BG, height=30)
+        self.title_bar.pack(fill=tk.X)
+        self.title_bar.bind('<Button-1>', self.start_move)
+        self.title_bar.bind('<B1-Motion>', self.on_move)
         
+        # Add title label
+        self.title_label = tk.Label(self.title_bar, text="RapidLogger", 
+                                  bg=Colors.TITLE_BG, fg=Colors.FG)
+        self.title_label.pack(side=tk.LEFT, padx=10)
+        self.title_label.bind('<Button-1>', self.start_move)
+        self.title_label.bind('<B1-Motion>', self.on_move)
+        
+        # Create close button
+        self.close_button = tk.Button(self.title_bar, text='✕', 
+                                    command=self.root.quit, 
+                                    bg=Colors.TITLE_BG, 
+                                    fg=Colors.FG,
+                                    bd=0, padx=10,
+                                    activebackground=Colors.CLOSE_HOVER,
+                                    activeforeground=Colors.FG)
+        self.close_button.pack(side=tk.RIGHT)
+        self.close_button.bind('<Enter>', lambda e: e.widget.config(bg=Colors.CLOSE_HOVER))
+        self.close_button.bind('<Leave>', lambda e: e.widget.config(bg=Colors.TITLE_BG))
+
+    def _create_main_frame(self):
+        """Create the main application frame"""
+        self.main_frame = ttk.Frame(self.root, padding="10", style='Dark.TFrame')
+        self.main_frame.pack(fill=tk.BOTH, expand=True)
+
+    def _create_input_fields(self):
+        """Create the input fields with labels"""
+        # First input frame
+        self.input_frame = ttk.Frame(self.main_frame, style='Dark.TFrame')
+        self.input_frame.pack(fill=tk.X, pady=5)
+        
+        self.input1_label = ttk.Label(self.input_frame, text="Comp:", 
+                                    style='Dark.TLabel', width=6, anchor='w')
+        self.input1_label.pack(side=tk.LEFT, padx=(0, 10))
+        self.input1 = tk.Entry(self.input_frame, width=30,
+                             bg=Colors.ENTRY_BG,
+                             fg=Colors.FG,
+                             insertbackground=Colors.FG)
+        self.input1.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        
+        # Second input frame
+        self.input2_frame = ttk.Frame(self.main_frame, style='Dark.TFrame')
+        self.input2_frame.pack(fill=tk.X, pady=5)
+        
+        self.input2_label = ttk.Label(self.input2_frame, text="Link:",
+                                    style='Dark.TLabel', width=6, anchor='w')
+        self.input2_label.pack(side=tk.LEFT, padx=(0, 10))
+        self.input2 = tk.Entry(self.input2_frame, width=30,
+                             bg=Colors.ENTRY_BG,
+                             fg=Colors.FG,
+                             insertbackground=Colors.FG)
+        self.input2.pack(side=tk.LEFT, fill=tk.X, expand=True)
+
+    def _create_button(self, parent, text, command):
+        """Create a standardized button with hover effects"""
+        button = tk.Button(parent, text=text,
+                         command=command,
+                         bg=Colors.BUTTON_BG,
+                         fg=Colors.FG,
+                         activebackground=Colors.BUTTON_ACTIVE_BG,
+                         activeforeground=Colors.BUTTON_ACTIVE_FG,
+                         relief='flat',
+                         width=10,
+                         borderwidth=1)
+        button.bind('<Enter>', lambda e: e.widget.config(bg=Colors.BUTTON_HOVER))
+        button.bind('<Leave>', lambda e: e.widget.config(bg=Colors.BUTTON_BG))
+        return button
+
+    def _create_buttons(self):
+        """Create all action buttons"""
+        self.button_frame = ttk.Frame(self.main_frame, style='Dark.TFrame')
+        self.button_frame.pack(fill=tk.X, pady=10)
+        
+        # Create buttons using the helper method
+        self.send_button = self._create_button(self.button_frame, "Send", self.save_data)
+        self.send_button.pack(side=tk.LEFT, padx=5, expand=True)
+        
+        self.refresh_button = self._create_button(self.button_frame, "Refresh", self.refresh_view)
+        self.refresh_button.pack(side=tk.LEFT, padx=5, expand=True)
+
     def position_window(self):
         # Get screen width and height
         screen_width = self.root.winfo_screenwidth()
@@ -151,9 +152,9 @@ class OverlayApp:
         window_width = self.root.winfo_width()
         window_height = self.root.winfo_height()
         
-        # Position window in bottom right corner with some padding
-        x = screen_width - window_width - 20
-        y = screen_height - window_height - 40
+        # Position window in middle-right with padding
+        x = screen_width - window_width - 30
+        y = (screen_height - window_height) // 2  # Center vertically
         
         self.root.geometry(f"+{x}+{y}")
     

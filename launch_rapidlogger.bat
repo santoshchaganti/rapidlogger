@@ -1,2 +1,2 @@
 @echo off
-start /b pythonw overlay_app.py
+start /b pythonw rapidlogger.py
