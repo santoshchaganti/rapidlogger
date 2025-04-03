@@ -1,0 +1,6 @@
+# No external dependencies required
+# RapidLogger uses only built-in Python libraries:
+# - tkinter (GUI)
+# - csv (data storage)
+# - os (file operations)
+# - datetime (timestamps) 
