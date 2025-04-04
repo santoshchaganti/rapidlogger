@@ -19,3 +19,4 @@ build/
 # Windows
 desktop.ini
 launch_rapidlogger.bat - Shortcut.lnk
+rapidlogger.log
